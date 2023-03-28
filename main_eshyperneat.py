@@ -4,12 +4,15 @@ Fitness threshold set in config
 - by default very high to show the high possible accuracy of this library.
 """
 
-import pickle
+import pickle, sys, random
 import neat
 import neat.nn
 from pureples.shared.substrate import Substrate
 from pureples.shared.visualize import draw_net
 from pureples.es_hyperneat.es_hyperneat import ESNetwork
+
+seed = random.randrange(sys.maxsize)
+random.seed(seed)
 
 # S, M or L; Small, Medium or Large (logic implemented as "Not 'S' or 'M' then Large").
 VERSION = "S"
@@ -23,6 +26,8 @@ XOR_OUTPUTS = [(0.0,), (1.0,), (1.0,), (0.0,)]
 INPUT_COORDINATES = [(-1.0, -1.0), (0.0, -1.0), (1.0, -1.0)]
 OUTPUT_COORDINATES = [(0.0, 1.0)]
 SUBSTRATE = Substrate(INPUT_COORDINATES, OUTPUT_COORDINATES)
+
+path = "data/es_hyper_neat/"
 
 
 def params(version):
@@ -44,7 +49,7 @@ DYNAMIC_PARAMS = params(VERSION)
 # Config for CPPN.
 CONFIG = neat.config.Config(neat.genome.DefaultGenome, neat.reproduction.DefaultReproduction,
                             neat.species.DefaultSpeciesSet, neat.stagnation.DefaultStagnation,
-                            'venv/bin/pureples/experiments/xor/config_cppn_xor')
+                            f'{path}config_cppn_xor_eshyper')
 
 
 def eval_fitness(genomes, config):
@@ -100,7 +105,7 @@ if __name__ == '__main__':
     NETWORK = ESNetwork(SUBSTRATE, CPPN, DYNAMIC_PARAMS)
     # This will also draw winner_net.
     WINNER_NET = NETWORK.create_phenotype_network(
-        filename=f'venv/bin/pureples/experiments/xor/es_hyperneat_xor_{VERSION_TEXT}_winner.png')
+        filename=f'{path}es_hyperneat_xor_{VERSION_TEXT}_winner.png')
 
     for inputs, expected in zip(XOR_INPUTS, XOR_OUTPUTS):
         new_input = inputs + (1.0,)
@@ -114,6 +119,6 @@ if __name__ == '__main__':
 
     # Save CPPN if wished reused and draw it to file.
     draw_net(
-        CPPN, filename=f"venv/bin/pureples/experiments/xor/es_hyperneat_xor_{VERSION_TEXT}_cppn")
-    with open(f'venv/bin/pureples/experiments/xor/es_hyperneat_xor_{VERSION_TEXT}_cppn.pkl', 'wb') as output:
+        CPPN, filename=f"{path}es_hyperneat_xor_{VERSION_TEXT}_cppn")
+    with open(f'{path}es_hyperneat_xor_{VERSION_TEXT}_cppn.pkl', 'wb') as output:
         pickle.dump(CPPN, output, pickle.HIGHEST_PROTOCOL)
